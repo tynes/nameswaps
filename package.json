@@ -1,0 +1,21 @@
+{
+  "name": "nameswaps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "plugin.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "bmocha test/*-test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bmocha": "git+https://github.com/bcoin-org/bmocha.git",
+    "bsert": "git+https://github.com/chjj/bsert.git",
+    "bufio": "git+https://github.com/bcoin-org/bufio.git",
+    "hsd": "git+https://github.com/handshake-org/hsd.git"
+  }
+}
