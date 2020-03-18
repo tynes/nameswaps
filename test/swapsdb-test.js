@@ -5,13 +5,19 @@
 'use strict';
 
 const SwapsDB = require('../lib/swapsdb');
-const AddrWitness = require('../lib/addrwitness');
+const Program = require('../lib/program');
+const Address = require('hsd/lib/primitives/address');
+const SwapProof = require('../lib/swapproof');
 const random = require('bcrypto/lib/random');
 const Network = require('hsd/lib/protocol/network');
 const assert = require('bsert');
+const Outpoint = require('hsd/lib/primitives/outpoint');
+
+const AddrWitness = require('../lib/addrwitness');
 
 const network = Network.get('testnet');
 let swapsdb;
+
 describe('SwapsDB', function() {
   beforeEach(async () => {
     swapsdb = new SwapsDB({
@@ -36,41 +42,195 @@ describe('SwapsDB', function() {
     assert.bufferEqual(hash, indexed);
   });
 
-  it('should put addrwitness', async () => {
-    const addr = 'ts1qhl0zw3mtffpk566q7dglgkn9y67myf36fnqasr';
-    const witness = '025b8b459fa69d3b79ed9dfcf00d4106ba29fcd479f76259503bed702405e0cbd5';
+  it('should put swapproof', async () => {
+    const bytes = random.randomBytes(64);
 
-    const addrwitness = AddrWitness.fromAddress(addr, witness);
-    await swapsdb.putAddrWitness(addrwitness);
+    const proof = SwapProof.fromOptions({
+      version: 0,
+      name: 'foobar',
+      program: new Program(),
+      signature: bytes,
+      address: new Address(),
+      value: 100
+    });
 
-    const address = addrwitness.getAddress();
-    assert(await swapsdb.hasAddrWitness(address));
+    assert(await swapsdb.putSwapProof('foobar', proof));
   });
 
-  it('should get addrwitness', async () => {
-    const addr = 'ts1qhl0zw3mtffpk566q7dglgkn9y67myf36fnqasr';
-    const witness = '025b8b459fa69d3b79ed9dfcf00d4106ba29fcd479f76259503bed702405e0cbd5';
+  it('should get swapproof', async () => {
+    const bytes = random.randomBytes(64);
 
-    const addrwitness = AddrWitness.fromAddress(addr, witness);
-    await swapsdb.putAddrWitness(addrwitness);
+    const proof = SwapProof.fromOptions({
+      version: 0,
+      name: 'mytest',
+      program: new Program(),
+      signature: bytes,
+      address: new Address(),
+      value: 100,
+      network: network
+    });
 
-    const address = addrwitness.getAddress();
-    const indexed = await swapsdb.getAddrWitness(address);
+    assert(await swapsdb.putSwapProof('mytest', proof));
 
-    assert.deepEqual(addrwitness, indexed);
+    const read = await swapsdb.getSwapProof('mytest');
+
+    assert.deepEqual(proof, read);
   });
 
-  it('should delete addrwitness', async () => {
-    const addr = 'ts1qhl0zw3mtffpk566q7dglgkn9y67myf36fnqasr';
-    const witness = '025b8b459fa69d3b79ed9dfcf00d4106ba29fcd479f76259503bed702405e0cbd5';
+  it('should has swapproof', async () => {
+    const bytes = random.randomBytes(64);
 
-    const addrwitness = AddrWitness.fromAddress(addr, witness);
-    const address = addrwitness.getAddress();
+    const proof = SwapProof.fromOptions({
+      version: 0,
+      name: 'tester',
+      program: new Program(),
+      signature: bytes,
+      address: new Address(),
+      value: 200,
+      network: network
+    });
 
-    await swapsdb.putAddrWitness(addrwitness);
-    assert(await swapsdb.hasAddrWitness(address));
+    assert(await swapsdb.putSwapProof('tester', proof));
+    assert(await swapsdb.getSwapProof('tester'));
+  });
 
-    await swapsdb.deleteAddrWitness(address);
-    assert.equal(await swapsdb.hasAddrWitness(address), false);
+  it('should delete swapproof', async () => {
+    const bytes = random.randomBytes(64);
+
+    const proof = SwapProof.fromOptions({
+      version: 0,
+      name: 'foobar',
+      program: new Program(),
+      signature: bytes,
+      address: new Address(),
+      value: 200,
+      network: network
+    });
+
+    assert(await swapsdb.putSwapProof('foobar', proof));
+    assert.equal(await swapsdb.hasSwapProof('foobar'), true);
+    assert(await swapsdb.deleteSwapProof('foobar'));
+    assert.equal(await swapsdb.hasSwapProof('foobar'), false);
+  });
+
+  it('should get swapproofs', async () => {
+    const bytes = random.randomBytes(64);
+    const size = 4;
+
+    // create multiple proofs in loop
+    // assert the proofs from the db
+    for (let i = 0; i < size; i++) {
+      const name = `test${i}`;
+
+      const proof = SwapProof.fromOptions({
+        version: 0,
+        name: name,
+        program: new Program(),
+        signature: bytes,
+        address: new Address(),
+        value: 200,
+        network: network
+      });
+
+      assert(await swapsdb.putSwapProof(proof.name, proof));
+    }
+
+    const proofs = await swapsdb.getSwapProofs();
+    assert.equal(proofs.length, size);
+
+    for (const [i, proof] of proofs.entries())
+      assert.equal(proof.name, `test${i}`);
+  });
+
+  it('should put program', async () => {
+    const txid = random.randomBytes(32);
+    const bytes = random.randomBytes(32);
+    const index = 0;
+
+    const program = Program.fromOptions({
+      type: Program.types.SCRIPT,
+      data: bytes,
+      outpoint: new Outpoint(txid, index)
+    });
+
+    assert(await swapsdb.putProgram(txid, index, program));
+  });
+
+  it('should get program', async () => {
+    const txid = random.randomBytes(32);
+    const pubkeyhash = random.randomBytes(20);
+    const index = 0;
+
+    const program = Program.fromOptions({
+      type: Program.types.PUBKEY,
+      data: pubkeyhash,
+      outpoint: new Outpoint(txid, index)
+    });
+
+    assert(await swapsdb.putProgram(txid, index, program));
+
+    const read = await swapsdb.getProgram(txid, index);
+
+    assert.deepEqual(program, read);
+  });
+
+  it('should has program', async () => {
+    const txid = random.randomBytes(32);
+    const pubkeyhash = random.randomBytes(20);
+    const index = 0;
+
+    const program = Program.fromOptions({
+      type: Program.types.PUBKEY,
+      data: pubkeyhash,
+      outpoint: new Outpoint(txid, index)
+    });
+
+    assert(await swapsdb.putProgram(txid, index, program));
+
+    assert(await swapsdb.hasProgram(txid, index));
+  });
+
+  it('should delete program', async () => {
+    const txid = random.randomBytes(32);
+    const pubkeyhash = random.randomBytes(20);
+    const index = 0;
+
+    const program = Program.fromOptions({
+      type: Program.types.PUBKEY,
+      data: pubkeyhash,
+      outpoint: new Outpoint(txid, index)
+    });
+
+    assert(await swapsdb.putProgram(txid, index, program));
+    assert(await swapsdb.hasProgram(txid, index));
+    assert(await swapsdb.deleteProgram(txid, index));
+    assert.equal(await swapsdb.hasProgram(txid, index), false);
+  });
+
+  it('should get programs', async () => {
+    const size = 4;
+
+    const hashes = [];
+    const outpoints = [];
+
+    for (let i = 0; i < size; i++) {
+      hashes.push(random.randomBytes(32));
+      outpoints.push([random.randomBytes(32), 0]);
+    }
+
+    for (const [i, hash] of hashes.entries()) {
+      const [txid, index] = outpoints[i];
+      const program = Program.fromOptions({
+        type: Program.types.PUBKEY,
+        data: hash,
+        outpoint: new Outpoint(txid, index)
+      });
+
+      assert(await swapsdb.putProgram(txid, index, program));
+    }
+
+    const programs = await swapsdb.getPrograms();
+
+    assert.equal(programs.length, size);
   });
 });
