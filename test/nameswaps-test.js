@@ -10,6 +10,8 @@ const Network = require('hsd/lib/protocol/network');
 const Chain = require('hsd/lib/blockchain/chain')
 const assert = require('bsert');
 
+// TODO: fix all of these tests
+
 const network = Network.get('regtest');
 let nameswaps, chain;
 

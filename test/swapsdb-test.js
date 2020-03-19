@@ -4,16 +4,14 @@
 
 'use strict';
 
-const SwapsDB = require('../lib/swapsdb');
-const Program = require('../lib/program');
-const Address = require('hsd/lib/primitives/address');
-const SwapProof = require('../lib/swapproof');
-const random = require('bcrypto/lib/random');
-const Network = require('hsd/lib/protocol/network');
 const assert = require('bsert');
+const Address = require('hsd/lib/primitives/address');
+const Network = require('hsd/lib/protocol/network');
 const Outpoint = require('hsd/lib/primitives/outpoint');
-
-const AddrWitness = require('../lib/addrwitness');
+const random = require('bcrypto/lib/random');
+const SwapsDB = require('../lib/core/swapsdb');
+const Program = require('../lib/primitives/program');
+const SwapProof = require('../lib/primitives/swapproof');
 
 const network = Network.get('testnet');
 let swapsdb;

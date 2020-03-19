@@ -4,17 +4,22 @@
 'use strict';
 
 const assert = require('bsert');
+const {nonce} = require('../lib/net/common');
+const Program = require('../lib/primitives/program');
+const SwapProof = require('../lib/primitives/swapproof');
+const Framer = require('../lib/net/framer');
+const packets = require('../lib/net/packets');
+const NetAddress = require('../lib/net/netaddress');
+const InvItem = require('../lib/net/invitem');
+const SwapsNetwork = require('../lib/core/swapsnetwork');
+const Network = require('hsd/lib/protocol/network');
 
-const {nonce} = require('../lib/common');
-
-const Program = require('../lib/program');
-const SwapProof = require('../lib/swapproof');
-
-const Framer = require('../lib/framer');
-const packets = require('../lib/packets');
-const NetAddress = require('../lib/netaddress');
-const InvItem = require('../lib/invitem');
-//const Network = require('../lib/protocol/network');
+const networks = {
+  main: SwapsNetwork(Network.get('main')),
+  testnet: SwapsNetwork(Network.get('testnet')),
+  regtest: SwapsNetwork(Network.get('regtest')),
+  simnet: SwapsNetwork(Network.get('simnet'))
+};
 
 describe('Net', function() {
   describe('Packets', function() {
