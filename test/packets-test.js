@@ -347,9 +347,35 @@ describe('Net', function() {
       let pkt = new packets.GetDataSyncPacket(locator, stop, flags);
       check(pkt);
 
-      const encoded = pkt.encode();
+      pkt = packets.GetDataSyncPacket.decode(pkt.encode());
+      check(pkt);
+    });
 
-      pkt = packets.GetDataSyncPacket.decode(encoded);
+    it('should encode/decode datasync packets', () => {
+      const items = [
+        new packets.SwapProofPacket(new SwapProof()),
+        new packets.ProgramPacket(new Program()),
+        new packets.ProgramPacket(new Program()),
+        new packets.SwapProofPacket(new SwapProof())
+      ];
+
+      const notFound = [
+        [Buffer.alloc(32), Buffer.alloc(32)],
+        [Buffer.alloc(32), Buffer.alloc(32)]
+      ];
+
+      const check = (pkt) => {
+        assert.equal(pkt.type, packets.types.DATASYNC);
+        assert.equal(pkt.items.length, items.length);
+        assert.deepEqual(pkt.items, items);
+        assert.equal(pkt.notFound.length, notFound.length);
+        assert.deepEqual(pkt.notFound, notFound);
+      };
+
+      let pkt = new packets.DataSyncPacket(items, notFound);
+      check(pkt);
+
+      pkt = packets.DataSyncPacket.decode(pkt.encode());
       check(pkt);
     });
 
