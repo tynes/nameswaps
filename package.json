@@ -13,9 +13,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "bcrypto": "^5.1.0",
+    "bdb": "^1.2.1",
     "bmocha": "git+https://github.com/bcoin-org/bmocha.git",
     "bsert": "git+https://github.com/chjj/bsert.git",
+    "buffer-map": "0.0.7",
     "bufio": "git+https://github.com/bcoin-org/bufio.git",
-    "hsd": "git+https://github.com/handshake-org/hsd.git"
+    "hs-client": "git+https://github.com/handshake-org/hs-client.git",
+    "hsd": "git+https://github.com/tynes/hsd.git#remove-logs"
   }
 }
