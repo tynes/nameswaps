@@ -25,6 +25,7 @@ $ ./bin/swapswallet-cli
 MIT License.
 
 - Copyright (c) 2019-2020, Mark Tyneway (https://github.com/tynes)
+- Copyright (c) 2020, DNS.Live (https://github.com/dnslive)
 
 ### Bcoin
 
