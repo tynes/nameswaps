@@ -40,6 +40,10 @@ const node = new FullNode({
   ]
 });
 
+process.on('SIGINT', async () => {
+  await node.close();
+});
+
 process.on('unhandledRejection', (err, promise) => {
   throw err;
 });
