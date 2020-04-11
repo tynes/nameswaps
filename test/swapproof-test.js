@@ -1,6 +1,7 @@
 /**
  * test/swapproof-test.js - SwapProof tests for NameSwaps
  */
+
 const SwapProof = require('../lib/primitives/swapproof');
 const Program = require('../lib/primitives/program');
 const Address = require('hsd/lib/primitives/address');

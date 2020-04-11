@@ -13,6 +13,7 @@ const NetAddress = require('../lib/net/netaddress');
 const InvItem = require('../lib/net/invitem');
 const SwapsNetwork = require('../lib/core/swapsnetwork');
 const Network = require('hsd/lib/protocol/network');
+const {BufferMap} = require('buffer-map');
 
 const networks = {
   main: SwapsNetwork(Network.get('main')),
@@ -352,12 +353,16 @@ describe('Net', function() {
     });
 
     it('should encode/decode datasync packets', () => {
-      const items = [
-        new packets.SwapProofPacket(new SwapProof()),
-        new packets.ProgramPacket(new Program()),
-        new packets.ProgramPacket(new Program()),
-        new packets.SwapProofPacket(new SwapProof())
-      ];
+      const items = new BufferMap([
+        [Buffer.alloc(32, 0x00), [
+          new packets.SwapProofPacket(new SwapProof()),
+          new packets.ProgramPacket(new Program()),
+        ]],
+        [Buffer.alloc(32, 0x01), [
+          new packets.SwapProofPacket(new SwapProof()),
+          new packets.ProgramPacket(new Program()),
+        ]]
+      ]);
 
       const notFound = [
         [Buffer.alloc(32), Buffer.alloc(32)],

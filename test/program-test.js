@@ -2,6 +2,7 @@
  * test/swapproof-test.js - SwapProof tests for NameSwaps
  */
 const Program = require('../lib/primitives/program');
+const SwapRing = require('../lib/wallet/swapring');
 const Address = require('hsd/lib/primitives/address');
 const Outpoint = require('hsd/lib/primitives/outpoint');
 const random = require('bcrypto/lib/random');
@@ -81,7 +82,17 @@ describe('Program', function() {
     assert.deepEqual(json, program.toJSON());
   });
 
-  it('should verify', () => {
+  it('should work with NAIVE swap script', () => {
     this.skip();
+
+    const ring = SwapRing.generate();
+
+    const program = Program.fromOptions({
+      type: Program.types.SCRIPT,
+      data: ring.script.encode(),
+      outpoint: new Outpoint()
+    });
+
+    console.log(program);
   });
 });
